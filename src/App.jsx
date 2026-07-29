@@ -9,7 +9,8 @@ import ProductForm from "@/pages/admin/ProductForm";
 import AdminCategories from "@/pages/admin/Categories";
 import AdminOrders from "@/pages/admin/Orders";
 import AdminBanners from "@/pages/admin/Banners";
-import AdminUsers from "@/pages/admin/Users";
+import Users from "@/pages/admin/Users";
+import Settings from "@/pages/admin/Settings";
 
 function App() {
   return (
@@ -24,7 +25,8 @@ function App() {
         <Route path="categories" element={<AdminCategories />} />
         <Route path="orders" element={<AdminOrders />} />
         <Route path="banners" element={<AdminBanners />} />
-        <Route path="users" element={<AdminUsers />} />
+        <Route path="users" element={<Users />} />
+        <Route path="settings" element={<Settings />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />
