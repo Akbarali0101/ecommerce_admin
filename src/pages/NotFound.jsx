@@ -29,14 +29,16 @@ export default function NotFound() {
         </p>
 
         <div className="mt-7 flex w-full flex-col gap-2 sm:flex-row sm:justify-center">
-          <Button variant="outline" onClick={() => window.history.back()} className="gap-2">
-            <ArrowLeft className="size-4" />
-            Orqaga
+          <Button variant="outline" asChild className="gap-2">
+            <Link to="/login">
+              <ArrowLeft className="size-4" />
+              Orqaga
+            </Link>
           </Button>
           <Button asChild className="gap-2">
-            <Link to="/">
+            <Link to="/login">
               <Home className="size-4" />
-              Boshqaruv paneliga qaytish
+              Login sahifasiga qaytish
             </Link>
           </Button>
         </div>
