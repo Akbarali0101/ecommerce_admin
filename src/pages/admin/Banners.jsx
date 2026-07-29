@@ -83,3 +83,6 @@ export default function AdminBanners() {
     </div>
   );
 }
+
+
+// salom bu test?
