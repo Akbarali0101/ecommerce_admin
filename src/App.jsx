@@ -1,8 +1,6 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { AdminLayout } from "@/components/layout/AdminLayout";
-import { ProtectedAdminRoute } from "@/pages/auth/ProtectedAdminRoute";
-
-import AdminLogin from "@/pages/auth/AdminLogin";
+import { AutoAuth } from "@/components/auth/AutoAuth";
 
 import Dashboard from "@/pages/admin/Dashboard";
 import AdminProducts from "@/pages/admin/Products";
@@ -11,16 +9,12 @@ import AdminCategories from "@/pages/admin/Categories";
 import AdminOrders from "@/pages/admin/Orders";
 import AdminBanners from "@/pages/admin/Banners";
 import AdminUsers from "@/pages/admin/Users";
-import NotFound from "@/pages/NotFound";
 
 function App() {
   return (
-    <Routes>
-      {/* Auth */}
-      <Route path="/login" element={<AdminLogin />} />
-
-      {/* Admin panel - faqat token bo'lganlar kira oladi */}
-      <Route element={<ProtectedAdminRoute />}>
+    <>
+      <AutoAuth />
+      <Routes>
         <Route path="/" element={<AdminLayout />}>
           <Route index element={<Dashboard />} />
           <Route path="products" element={<AdminProducts />} />
@@ -31,9 +25,10 @@ function App() {
           <Route path="banners" element={<AdminBanners />} />
           <Route path="users" element={<AdminUsers />} />
         </Route>
-      </Route>
-      <Route path="*" element={<NotFound />} />
-    </Routes>
+
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </>
   );
 }
 

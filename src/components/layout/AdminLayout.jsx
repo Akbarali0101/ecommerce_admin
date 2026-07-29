@@ -25,6 +25,5 @@ export function AdminLayout() {
         </main>
       </div>
     </div>
-    
   );
 }
