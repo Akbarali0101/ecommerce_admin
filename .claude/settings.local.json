@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git ls-tree *)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:5174/)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:5173/)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:5757/)",
+      "Bash(curl -s http://localhost:5174/)",
+      "Bash(curl -s \"http://localhost:5174/src/App.jsx\" -o /dev/null -w \"%{http_code}\\\\n\")",
+      "Bash(curl -s \"http://localhost:5174/src/main.jsx\" -o /dev/null -w \"%{http_code}\\\\n\")"
+    ]
+  }
+}
