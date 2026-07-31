@@ -12,12 +12,12 @@ export const baseApi = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl,
     prepareHeaders: (headers) => {
-  const token = localStorage.getItem("admin_token");
-  if (token) {
-    headers.set("Authorization", `Bearer ${token}`);
-  }
-  return headers;
-},
+      const token = localStorage.getItem("admin_token");
+      if (token) {
+        headers.set("Authorization", `Bearer ${token}`);
+      }
+      return headers;
+    },
   }),
   tagTypes: Object.values(API_TAGS),
   // Backend har doim {success, data, ...} formatida javob qaytaradi.

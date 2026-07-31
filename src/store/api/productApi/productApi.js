@@ -6,10 +6,11 @@ export const productApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getAllProducts: builder.query({
       query: (params) => ({ url: PRODUCT_PATH.GET_ALL, params: params || {} }),
+      transformResponse: (response) => response?.data || response || [],
       providesTags: (result) =>
-        result?.data
+        result
           ? [
-              ...result.data.map((p) => ({ type: API_TAGS.PRODUCT, id: p._id })),
+              ...result.map((p) => ({ type: API_TAGS.PRODUCT, id: p._id })),
               { type: API_TAGS.PRODUCT, id: "LIST" },
             ]
           : [{ type: API_TAGS.PRODUCT, id: "LIST" }],
@@ -17,10 +18,11 @@ export const productApi = baseApi.injectEndpoints({
 
     getAllProductsAdmin: builder.query({
       query: (params) => ({ url: PRODUCT_PATH.GET_ALL_ADMIN, params: params || {} }),
+      transformResponse: (response) => response?.data || response || [],
       providesTags: (result) =>
-        result?.data
+        result
           ? [
-              ...result.data.map((p) => ({ type: API_TAGS.PRODUCT, id: p._id })),
+              ...result.map((p) => ({ type: API_TAGS.PRODUCT, id: p._id })),
               { type: API_TAGS.PRODUCT, id: "LIST" },
             ]
           : [{ type: API_TAGS.PRODUCT, id: "LIST" }],
@@ -28,6 +30,7 @@ export const productApi = baseApi.injectEndpoints({
 
     getSingleProduct: builder.query({
       query: (id) => PRODUCT_PATH.GET_SINGLE(id),
+      transformResponse: (response) => response?.data || response,
       providesTags: (_r, _e, id) => [{ type: API_TAGS.PRODUCT, id }],
     }),
 
