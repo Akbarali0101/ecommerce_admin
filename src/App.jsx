@@ -10,7 +10,10 @@ import AdminCategories from "@/pages/admin/Categories";
 import AdminOrders from "@/pages/admin/Orders";
 import AdminBanners from "@/pages/admin/Banners";
 import Users from "@/pages/admin/Users";
-import Settings from "@/pages/admin/Settings";
+
+import { Toaster } from "sonner";
+// ...
+<Toaster position="top-right" richColors />
 
 function App() {
   return (
@@ -26,7 +29,6 @@ function App() {
         <Route path="orders" element={<AdminOrders />} />
         <Route path="banners" element={<AdminBanners />} />
         <Route path="users" element={<Users />} />
-        <Route path="settings" element={<Settings />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />

@@ -57,4 +57,3 @@ export const {
   useDeleteUserMutation,
   useUpdateMeInfoMutation,
 } = authApi;
-

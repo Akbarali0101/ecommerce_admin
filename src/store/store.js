@@ -2,6 +2,7 @@ import { configureStore } from "@reduxjs/toolkit";
 import { baseApi } from "./api/baseApi/baseApi";
 import uiReducer from "./slices/uiSlice";
 
+
 // Har bir domen api fayli shu yerga import qilinishi kerak, chunki
 // injectEndpoints faqat fayl import qilinganda ishga tushadi.
 import "./api/authApi/authApi";
