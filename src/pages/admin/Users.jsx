@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import * as React from "react";
-import { toast } from "sonner";
+import toast from "react-hot-toast";
 import {
   useGetAllUsersQuery,
   useDeleteUserMutation,
@@ -64,7 +64,7 @@ const usersData = usersResponse?.data || [];
 
   if (isLoading) {
     return (
-      <div className="flex h-[200px] items-center justify-center">
+      <div className="flex h-52 items-center justify-center">
         Loading user info...
       </div>
     );

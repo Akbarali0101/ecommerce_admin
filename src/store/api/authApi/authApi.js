@@ -22,7 +22,7 @@ export const authApi = baseApi.injectEndpoints({
         try {
           const { data } = await queryFulfilled;
           const token = data?.data?.token;
-          if (token) localStorage.setItem("token", token);
+          if (token) localStorage.setItem("admin_token", token);
         } catch {
           /* Token saqlanmadi */
         }
@@ -40,7 +40,7 @@ export const authApi = baseApi.injectEndpoints({
         try {
           const { data } = await queryFulfilled;
           const token = data?.data?.token;
-          if (token) localStorage.setItem("token", token);
+          if (token) localStorage.setItem("admin_token", token);
         } catch {
           /* Token saqlanmadi */
         }

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { toast } from 'sonner';
+import toast from 'react-hot-toast';
 
 const API_BASE_URL = "http://localhost:5757";
 
