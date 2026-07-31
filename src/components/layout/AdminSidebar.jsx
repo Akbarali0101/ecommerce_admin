@@ -1,4 +1,5 @@
-import { NavLink } from "react-router-dom";
+import * as React from "react";
+import { NavLink, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
   Package,
@@ -6,6 +7,8 @@ import {
   ShoppingCart,
   Image,
   Users,
+  Settings,
+  LogOut,
   ShoppingBag,
   ChevronLeft,
 } from "lucide-react";
@@ -21,11 +24,20 @@ const links = [
   { to: "/orders", label: "Buyurtmalar", icon: ShoppingCart },
   { to: "/banners", label: "Bannerlar", icon: Image },
   { to: "/users", label: "Foydalanuvchilar", icon: Users },
+  { to: "/settings", label: "Sozlamalar", icon: Settings },
 ];
 
 export function AdminSidebar() {
   const isOpen = useSelector((state) => state.ui.isAdminSidebarOpen);
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    // Clear token and redirect to login
+    localStorage.removeItem("token");
+    // Optionally dispatch logout action if exists
+    navigate("/login", { replace: true });
+  };
 
   return (
     <aside
@@ -73,6 +85,20 @@ export function AdminSidebar() {
           </NavLink>
         ))}
       </nav>
+
+      {/* Logout button at the bottom */}
+      <div className="flex-shrink-0 flex items-center gap-3 p-4 border-t">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="w-8"
+          onClick={handleLogout}
+          title="Chiqish"
+        >
+          <LogOut className="size-5" />
+        </Button>
+        {isOpen && <span className="text-sm">Chiqish</span>}
+      </div>
     </aside>
   );
 }

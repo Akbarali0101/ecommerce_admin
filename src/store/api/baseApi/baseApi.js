@@ -13,11 +13,9 @@ export const baseApi = createApi({
     baseUrl,
     prepareHeaders: (headers) => {
       const token = localStorage.getItem("admin_token");
-
       if (token) {
         headers.set("Authorization", `Bearer ${token}`);
       }
-
       return headers;
     },
   }),
