@@ -38,7 +38,6 @@ export default function AdminLogin() {
         return;
       }
 
-      // Faqat role === "admin" bo'lganlarga ruxsat berish
       if (data?.data?.role !== "admin") {
         toast.error("Sizda admin huquqi yo'q");
         return;
