@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
-import { Plus, Pencil, Trash2, ImageOff, AlertTriangle } from "lucide-react";
+import { useState } from "react";
+import { Plus, Pencil, Trash2, ImageOff, Loader2 } from "lucide-react";
+import toast from "react-hot-toast";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,119 +13,83 @@ import {
   DialogFooter,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { mockCategories } from "@/data/mockData";
-import { toast } from "sonner";
+import {
+  useGetAllCategoriesQuery,
+  useCreateCategoryMutation,
+  useUpdateCategoryMutation,
+  useDeleteCategoryMutation,
+} from "@/store/api/categoryApi/categoryApi";
 
 export default function AdminCategories() {
-  const [categories, setCategories] = useState([]);
+  const { data: categories = [], isLoading } = useGetAllCategoriesQuery();
+  const [createCategory, { isLoading: isCreating }] = useCreateCategoryMutation();
+  const [updateCategory, { isLoading: isUpdating }] = useUpdateCategoryMutation();
+  const [deleteCategory, { isLoading: isDeleting }] = useDeleteCategoryMutation();
 
-  // Forma (qo'shish/tahrirlash) modal state'lari
   const [open, setOpen] = useState(false);
-  const [isEdit, setIsEdit] = useState(false);
-  const [editingId, setEditingId] = useState(null);
-  const [formData, setFormData] = useState({ name: "", slug: "" });
+  const [editingCategory, setEditingCategory] = useState(null);
+  const [form, setForm] = useState({ name: "", slug: "" });
 
-  // O'chirish tasdiqlash modal state'lari
-  const [deleteOpen, setDeleteOpen] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
 
-  // localStorage'dan kategoriyalarni yuklash
-  useEffect(() => {
-    const saved = localStorage.getItem("categories");
-    if (saved) {
-      setCategories(JSON.parse(saved));
-    } else {
-      localStorage.setItem("categories", JSON.stringify(mockCategories));
-      setCategories(mockCategories);
-    }
-  }, []);
+  const isSaving = isCreating || isUpdating;
 
-  // Forma inputlarini boshqarish
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  // "Yangi kategoriya" tugmasi bosilganda
-  const openAddModal = () => {
-    setIsEdit(false);
-    setEditingId(null);
-    setFormData({ name: "", slug: "" });
+  const openCreateDialog = () => {
+    setEditingCategory(null);
+    setForm({ name: "", slug: "" });
     setOpen(true);
   };
 
-  // Tahrirlash (Pencil) tugmasi bosilganda
-  const openEditModal = (cat) => {
-    setIsEdit(true);
-    setEditingId(cat._id);
-    setFormData({ name: cat.name || "", slug: cat.slug || "" });
+  const openEditDialog = (cat) => {
+    setEditingCategory(cat);
+    setForm({ name: cat.name || "", slug: cat.slug || "" });
     setOpen(true);
   };
 
-  // Formani saqlash (qo'shish yoki tahrirlash)
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!formData.name.trim() || !formData.slug.trim()) {
-      toast.error("Iltimos, barcha maydonlarni to'ldiring!");
+    if (!form.name.trim() || !form.slug.trim()) {
+      toast.error("Iltimos, barcha maydonlarni to'ldiring");
       return;
     }
 
-    let updated = [];
-
-    if (isEdit) {
-      // TAHRIRLASH
-      updated = categories.map((cat) =>
-        String(cat._id) === String(editingId)
-          ? { ...cat, name: formData.name, slug: formData.slug }
-          : cat
-      );
-      toast.success("Kategoriya muvaffaqiyatli tahrirlandi!");
-    } else {
-      // YANGI QO'SHISH
-      const newCategory = {
-        _id: String(Date.now()),
-        name: formData.name,
-        slug: formData.slug,
-      };
-      updated = [newCategory, ...categories];
-      toast.success("Yangi kategoriya qo'shildi!");
+    try {
+      if (editingCategory) {
+        await updateCategory({ id: editingCategory._id, ...form }).unwrap();
+        toast.success("Kategoriya muvaffaqiyatli tahrirlandi");
+      } else {
+        await createCategory(form).unwrap();
+        toast.success("Kategoriya muvaffaqiyatli qo'shildi");
+      }
+      setOpen(false);
+      setEditingCategory(null);
+      setForm({ name: "", slug: "" });
+    } catch (err) {
+      toast.error(err?.data?.message || "Xatolik yuz berdi");
     }
-
-    setCategories(updated);
-    localStorage.setItem("categories", JSON.stringify(updated));
-    setOpen(false);
   };
 
-  // O'chirish modalini ochish
-  const openDeleteModal = (cat) => {
-    setSelectedCategory(cat);
-    setDeleteOpen(true);
-  };
-
-  // O'chirishni tasdiqlash
-  const confirmDelete = () => {
-    if (!selectedCategory) return;
-
-    const updated = categories.filter(
-      (cat) => String(cat._id) !== String(selectedCategory._id)
-    );
-    setCategories(updated);
-    localStorage.setItem("categories", JSON.stringify(updated));
-
-    toast.success("Kategoriya o'chirildi!");
-    setDeleteOpen(false);
-    setSelectedCategory(null);
+  const handleDeleteConfirm = async () => {
+    if (!deleteTarget) return;
+    try {
+      await deleteCategory(deleteTarget._id).unwrap();
+      toast.success("Kategoriya o'chirildi");
+      setDeleteTarget(null);
+    } catch (err) {
+      toast.error(err?.data?.message || "O'chirishda xatolik yuz berdi");
+    }
   };
 
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
-        <p className="text-sm text-muted-foreground">{categories.length} ta kategoriya</p>
+        <p className="text-sm text-muted-foreground">
+          {isLoading ? "Yuklanmoqda..." : `${categories.length} ta kategoriya`}
+        </p>
 
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button onClick={openAddModal}>
+            <Button onClick={openCreateDialog}>
               <Plus className="size-4" />
               Yangi kategoriya
             </Button>
@@ -132,35 +97,34 @@ export default function AdminCategories() {
           <DialogContent>
             <DialogHeader>
               <DialogTitle>
-                {isEdit ? "Kategoriyani tahrirlash" : "Yangi kategoriya qo'shish"}
+                {editingCategory ? "Kategoriyani tahrirlash" : "Yangi kategoriya qo'shish"}
               </DialogTitle>
             </DialogHeader>
             <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
               <div className="flex flex-col gap-1.5">
                 <Label>Nomi</Label>
                 <Input
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
                   placeholder="Masalan: Elektronika"
-                  required
+                  value={form.name}
+                  onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
                 />
               </div>
               <div className="flex flex-col gap-1.5">
                 <Label>Slug</Label>
                 <Input
-                  name="slug"
-                  value={formData.slug}
-                  onChange={handleChange}
                   placeholder="masalan: elektronika"
-                  required
+                  value={form.slug}
+                  onChange={(e) => setForm((f) => ({ ...f, slug: e.target.value }))}
                 />
               </div>
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={() => setOpen(false)}>
                   Bekor qilish
                 </Button>
-                <Button type="submit">{isEdit ? "Saqlash" : "Qo'shish"}</Button>
+                <Button type="submit" disabled={isSaving}>
+                  {isSaving && <Loader2 className="size-4 animate-spin" />}
+                  {editingCategory ? "Saqlash" : "Qo'shish"}
+                </Button>
               </DialogFooter>
             </form>
           </DialogContent>
@@ -182,7 +146,7 @@ export default function AdminCategories() {
                 variant="ghost"
                 size="icon"
                 className="size-8"
-                onClick={() => openEditModal(cat)}
+                onClick={() => openEditDialog(cat)}
               >
                 <Pencil className="size-3.5" />
               </Button>
@@ -190,7 +154,7 @@ export default function AdminCategories() {
                 variant="ghost"
                 size="icon"
                 className="size-8 text-destructive hover:text-destructive"
-                onClick={() => openDeleteModal(cat)}
+                onClick={() => setDeleteTarget(cat)}
               >
                 <Trash2 className="size-3.5" />
               </Button>
@@ -199,34 +163,27 @@ export default function AdminCategories() {
         ))}
       </div>
 
-      {/* O'CHIRISH TASDIQLASH MODALI (Ogohlantiruv paneli) */}
-      {deleteOpen && selectedCategory && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl border border-gray-100 text-gray-900 space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-red-100 text-red-600">
-                <AlertTriangle className="size-5" />
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900">Kategoriyani o'chirish</h3>
-                <p className="text-sm text-gray-500 mt-1">
-                  "<span className="font-medium text-gray-800">{selectedCategory.name}</span>"
-                  kategoriyasini haqiqatdan ham o'chirmoqchimisiz?
-                </p>
-              </div>
-            </div>
-
-            <div className="flex justify-end gap-2 pt-2">
-              <Button type="button" variant="outline" onClick={() => setDeleteOpen(false)}>
-                Bekor qilish
-              </Button>
-              <Button type="button" variant="destructive" onClick={confirmDelete}>
-                O'chirish
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* O'chirishni tasdiqlash oynasi */}
+      <Dialog open={!!deleteTarget} onOpenChange={(v) => !v && setDeleteTarget(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Kategoriyani o'chirish</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground">
+            Haqiqatan ham <span className="font-medium text-foreground">{deleteTarget?.name}</span>{" "}
+            kategoriyasini o'chirmoqchimisiz? Bu amalni ortga qaytarib bo'lmaydi.
+          </p>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteTarget(null)}>
+              Bekor qilish
+            </Button>
+            <Button variant="destructive" disabled={isDeleting} onClick={handleDeleteConfirm}>
+              {isDeleting && <Loader2 className="size-4 animate-spin" />}
+              O'chirish
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
