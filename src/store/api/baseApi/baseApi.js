@@ -1,7 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { API_TAGS } from "@/constants/apiTags";
 
-const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:8989";
+const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:5757";
 
 /**
  * Asosiy (root) API. Har bir modul (auth, product, category...)
