@@ -6,10 +6,11 @@ export const categoryApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getAllCategories: builder.query({
       query: () => CATEGORY_PATH.GET_ALL,
+      transformResponse: (response) => response?.data || response || [],
       providesTags: (result) =>
-        result?.data
+        result
           ? [
-              ...result.data.map((c) => ({ type: API_TAGS.CATEGORY, id: c._id })),
+              ...result.map((c) => ({ type: API_TAGS.CATEGORY, id: c._id })),
               { type: API_TAGS.CATEGORY, id: "LIST" },
             ]
           : [{ type: API_TAGS.CATEGORY, id: "LIST" }],
@@ -17,6 +18,7 @@ export const categoryApi = baseApi.injectEndpoints({
 
     getSingleCategory: builder.query({
       query: (id) => CATEGORY_PATH.GET_SINGLE(id),
+      transformResponse: (response) => response?.data || response,
       providesTags: (_r, _e, id) => [{ type: API_TAGS.CATEGORY, id }],
     }),
 
