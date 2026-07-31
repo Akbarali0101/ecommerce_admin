@@ -1,19 +1,61 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Plus, Search, Pencil, Trash2, ImageOff } from "lucide-react";
+import { Plus, Search, Pencil, Trash2, ImageOff, Loader2 } from "lucide-react";
+import toast from "react-hot-toast";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { mockProducts, mockCategories } from "@/data/mockData";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { formatPrice } from "@/lib/utils";
+import { useGetAllProductsQuery, useDeleteProductMutation } from "@/store/api/productApi/productApi";
 
 export default function AdminProducts() {
+  const { data: products = [], isLoading } = useGetAllProductsQuery();
+  const [deleteProduct, { isLoading: isDeleting }] = useDeleteProductMutation();
+
+  const [search, setSearch] = useState("");
+  const [deleteTarget, setDeleteTarget] = useState(null);
+
+  const filteredProducts = products.filter((p) =>
+    p.title?.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteTarget) return;
+
+    if (deleteTarget.stock !== 0) {
+      toast.error("Ombordagi qoldiq 0 bo'lmaguncha mahsulotni o'chirib bo'lmaydi");
+      setDeleteTarget(null);
+      return;
+    }
+
+    try {
+      await deleteProduct(deleteTarget._id).unwrap();
+      toast.success("Mahsulot o'chirildi");
+      setDeleteTarget(null);
+    } catch (err) {
+      toast.error(err?.data?.message || "O'chirishda xatolik yuz berdi");
+    }
+  };
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="relative w-full max-w-xs">
           <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
-          <Input placeholder="Mahsulot qidirish..." className="pl-9" />
+          <Input
+            placeholder="Mahsulot qidirish..."
+            className="pl-9"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
         </div>
         <Button asChild>
           <Link to="/products/new">
@@ -36,8 +78,28 @@ export default function AdminProducts() {
             </tr>
           </thead>
           <tbody>
-            {mockProducts.map((product) => {
-              const category = mockCategories.find((c) => c._id === product.category);
+            {isLoading && (
+              <tr>
+                <td colSpan={6} className="px-4 py-6 text-center text-muted-foreground">
+                  Yuklanmoqda...
+                </td>
+              </tr>
+            )}
+
+            {!isLoading && filteredProducts.length === 0 && (
+              <tr>
+                <td colSpan={6} className="px-4 py-6 text-center text-muted-foreground">
+                  Mahsulot topilmadi
+                </td>
+              </tr>
+            )}
+
+            {filteredProducts.map((product) => {
+              const categoryName =
+                typeof product.category === "object" && product.category !== null
+                  ? product.category.name
+                  : product.category;
+
               return (
                 <tr key={product._id} className="border-b last:border-0 hover:bg-secondary/30">
                   <td className="px-4 py-3">
@@ -48,7 +110,7 @@ export default function AdminProducts() {
                       <span className="line-clamp-1 font-medium">{product.title}</span>
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-muted-foreground">{category?.name || "-"}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{categoryName || "-"}</td>
                   <td className="px-4 py-3 font-medium">{formatPrice(product.price)}</td>
                   <td className="px-4 py-3">{product.stock}</td>
                   <td className="px-4 py-3">
@@ -67,6 +129,7 @@ export default function AdminProducts() {
                         variant="ghost"
                         size="icon"
                         className="size-8 text-destructive hover:text-destructive"
+                        onClick={() => setDeleteTarget(product)}
                       >
                         <Trash2 className="size-3.5" />
                       </Button>
@@ -78,6 +141,34 @@ export default function AdminProducts() {
           </tbody>
         </table>
       </Card>
+
+      {/* O'chirishni tasdiqlash oynasi */}
+      <Dialog open={!!deleteTarget} onOpenChange={(v) => !v && setDeleteTarget(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Mahsulotni o'chirish</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground">
+            Haqiqatan ham <span className="font-medium text-foreground">{deleteTarget?.title}</span>{" "}
+            mahsulotini o'chirmoqchimisiz?
+            {deleteTarget?.stock !== 0 && (
+              <span className="mt-2 block text-destructive">
+                Diqqat: ombordagi qoldiq {deleteTarget?.stock} ta. Faqat qoldiq 0 bo'lgan mahsulotlarni
+                o'chirish mumkin.
+              </span>
+            )}
+          </p>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteTarget(null)}>
+              Bekor qilish
+            </Button>
+            <Button variant="destructive" disabled={isDeleting} onClick={handleDeleteConfirm}>
+              {isDeleting && <Loader2 className="size-4 animate-spin" />}
+              O'chirish
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

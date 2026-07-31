@@ -20,12 +20,6 @@ export function AutoAuth() {
   const [status, setStatus] = useState("checking");
 
   useEffect(() => {
-    const existing = localStorage.getItem("token");
-    if (existing) {
-      setStatus("ready");
-      return;
-    }
-
     const tryLogin = async (email, password) => {
       try {
         const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/login`, {
@@ -35,7 +29,7 @@ export function AutoAuth() {
         });
         const data = await res.json();
         if (data?.token) {
-          localStorage.setItem("token", data.token);
+          localStorage.setItem("admin_token", data.token);
           return true;
         }
       } catch {
@@ -57,6 +51,12 @@ export function AutoAuth() {
     };
 
     const bootstrap = async () => {
+      const existing = localStorage.getItem("admin_token");
+      if (existing) {
+        setStatus("ready");
+        return;
+      }
+
       // Avval signup qilib ko'ramiz (agar admin mavjud bo'lmasa yaratadi)
       await trySignup();
       // Keyin login
