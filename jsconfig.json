@@ -1,9 +1,6 @@
 {
   "compilerOptions": {
-<<<<<<< HEAD
     "baseUrl": ".",
-=======
->>>>>>> hyprhub
     "paths": {
       "@/*": ["./src/*"]
     }
