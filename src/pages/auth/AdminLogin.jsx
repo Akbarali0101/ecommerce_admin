@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { ShoppingBag, ShieldCheck, Loader2 } from "lucide-react";
@@ -14,6 +14,13 @@ export default function AdminLogin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const token = localStorage.getItem("admin_token");
+    if (token) {
+      navigate("/", { replace: true });
+    }
+  }, [navigate]);
 
   async function handleSubmit(e) {
     e.preventDefault();
