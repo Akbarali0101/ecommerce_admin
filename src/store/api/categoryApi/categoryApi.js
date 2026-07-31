@@ -5,44 +5,53 @@ import { CATEGORY_PATH } from "./path";
 export const categoryApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getAllCategories: builder.query({
-      query: () => ({
-        url: CATEGORY_PATH.GET_ALL,
-        method: "GET",
-      }),
+      query: () => CATEGORY_PATH.GET_ALL,
       transformResponse: (response) => response?.data || response || [],
-      providesTags: [API_TAGS.CATEGORY],
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.map((c) => ({ type: API_TAGS.CATEGORY, id: c._id })),
+              { type: API_TAGS.CATEGORY, id: "LIST" },
+            ]
+          : [{ type: API_TAGS.CATEGORY, id: "LIST" }],
+    }),
+
+    getSingleCategory: builder.query({
+      query: (id) => CATEGORY_PATH.GET_SINGLE(id),
+      transformResponse: (response) => response?.data || response,
+      providesTags: (_r, _e, id) => [{ type: API_TAGS.CATEGORY, id }],
     }),
 
     createCategory: builder.mutation({
-      query: (body) => ({
-        url: CATEGORY_PATH.CREATE,
-        method: "POST",
-        body,
-      }),
-      invalidatesTags: [API_TAGS.CATEGORY],
+      query: (body) => ({ url: CATEGORY_PATH.CREATE, method: "POST", body }),
+      invalidatesTags: [{ type: API_TAGS.CATEGORY, id: "LIST" }],
     }),
 
     updateCategory: builder.mutation({
-      query: ({ id, ...body }) => ({
+      query: ({ id, body }) => ({
         url: CATEGORY_PATH.UPDATE(id),
         method: "PATCH",
         body,
       }),
-      invalidatesTags: [API_TAGS.CATEGORY],
+      invalidatesTags: (_r, _e, { id }) => [
+        { type: API_TAGS.CATEGORY, id },
+        { type: API_TAGS.CATEGORY, id: "LIST" },
+      ],
     }),
 
     deleteCategory: builder.mutation({
-      query: (id) => ({
-        url: CATEGORY_PATH.DELETE(id),
-        method: "DELETE",
-      }),
-      invalidatesTags: [API_TAGS.CATEGORY],
+      query: (id) => ({ url: CATEGORY_PATH.DELETE(id), method: "DELETE" }),
+      invalidatesTags: (_r, _e, id) => [
+        { type: API_TAGS.CATEGORY, id },
+        { type: API_TAGS.CATEGORY, id: "LIST" },
+      ],
     }),
   }),
 });
 
 export const {
   useGetAllCategoriesQuery,
+  useGetSingleCategoryQuery,
   useCreateCategoryMutation,
   useUpdateCategoryMutation,
   useDeleteCategoryMutation,
