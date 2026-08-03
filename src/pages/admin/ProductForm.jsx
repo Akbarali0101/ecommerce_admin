@@ -130,7 +130,7 @@ export default function ProductForm() {
 
     try {
       if (isEdit) {
-        await updateProduct({ id, ...payload }).unwrap();
+        await updateProduct({ id, body: payload }).unwrap();
         toast.success("Mahsulot muvaffaqiyatli tahrirlandi");
       } else {
         await createProduct(payload).unwrap();

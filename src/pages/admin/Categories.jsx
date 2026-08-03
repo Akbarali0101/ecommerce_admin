@@ -55,7 +55,7 @@ export default function AdminCategories() {
 
     try {
       if (editingCategory) {
-        await updateCategory({ id: editingCategory._id, ...form }).unwrap();
+        await updateCategory({ id: editingCategory._id, body: form }).unwrap();
         toast.success("Kategoriya muvaffaqiyatli tahrirlandi");
       } else {
         await createCategory(form).unwrap();
